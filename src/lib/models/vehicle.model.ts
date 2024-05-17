@@ -1,6 +1,3 @@
-import { Character } from "./character.model";
-import { Film } from "./film.model";
-
 export type Vehicle = {
   name: string;
   model: string;
@@ -13,8 +10,8 @@ export type Vehicle = {
   max_atmosphering_speed: string;
   cargo_capacity: string;
   consumables: string;
-  films: Film[];
-  pilots: Character[];
+  films: string[];
+  pilots: string[];
   url: string;
   created: string;
   edited: string;

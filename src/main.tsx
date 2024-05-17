@@ -8,8 +8,9 @@ import {
   createBrowserRouter,
 } from "react-router-dom";
 import { EpisodeLayout } from "./layouts/EpisodeLayout.tsx";
-import { CharacterList } from "./components/CharacterList.tsx";
 import { EpisodeDetail } from "./components/EpisodeDetail.tsx";
+import { CharacterDetail } from "./components/CharacterDetail.tsx";
+import { CharacterLayout } from "./layouts/CharacterLayout.tsx";
 
 const router = createBrowserRouter([
   {
@@ -22,12 +23,21 @@ const router = createBrowserRouter([
         element: <EpisodeLayout />,
         children: [
           {
-            path: ":id",
+            path: ":episodeId",
             element: <EpisodeDetail />,
           },
         ],
       },
-      { path: "character", element: <CharacterList /> },
+      {
+        path: "character",
+        element: <CharacterLayout />,
+        children: [
+          {
+            path: ":characterId",
+            element: <CharacterDetail />,
+          },
+        ],
+      },
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },

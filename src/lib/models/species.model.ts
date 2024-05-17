@@ -1,6 +1,3 @@
-import { Character } from "./character.model";
-import { Film } from "./film.model";
-
 export type Species = {
   name: string;
   classification: string;
@@ -12,8 +9,8 @@ export type Species = {
   skin_colors: string;
   language: string;
   homeworld: string;
-  people: Character[];
-  films: Film[];
+  people: string[];
+  films: string[];
   url: string;
   created: string;
   edited: string;

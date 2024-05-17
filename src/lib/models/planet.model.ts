@@ -1,6 +1,3 @@
-import { Character } from "./character.model";
-import { Film } from "./film.model";
-
 export type Planet = {
   name: string;
   diameter: string;
@@ -11,8 +8,8 @@ export type Planet = {
   climate: string;
   terrain: string;
   surface_water: string;
-  residents: Character[];
-  films: Film[];
+  residents: string[];
+  films: string[];
   url: string;
   created: string;
   edited: string;

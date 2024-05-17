@@ -1,6 +1,3 @@
-import { Film } from "./film.model";
-import { Character } from "./character.model";
-
 export type Starship = {
   name: string;
   model: string;
@@ -15,8 +12,8 @@ export type Starship = {
   MGLT: string;
   cargo_capacity: string;
   consumables: string;
-  films: Film[];
-  pilots: Character[];
+  films: string[];
+  pilots: string[];
   url: string;
   created: string;
   edited: string;

@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { Film } from "../lib/models";
 import { useNavigate } from "react-router-dom";
+import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 
 export const EpisodeList = () => {
   const navigate = useNavigate();
+  // const { episodeId } = useParams;
+  // console.log("🚀 ~ EpisodeList ~ episodeId:", episodeId);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isApiError, setIsApiError] = useState(false);
@@ -23,18 +26,22 @@ export const EpisodeList = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
+  // useEffect(() => {
+  //   episodeId && setItemSelected(episodeId);
+  // }, [episodeId]);
+
   return (
     <>
       {isLoading ? (
-        <div className="w-1/2 h-80 flex justify-center items-center">
+        <div className="h-80 flex justify-center items-center">
           <span className="loader"></span>
         </div>
       ) : isApiError ? (
-        <div className="text-2xl w-1/2 h-20 flex justify-center items-center">
+        <div className="text-2xl h-20 flex justify-center items-center">
           Ooops... something went wrong
         </div>
       ) : (
-        <div className="flex flex-col justify-start pl-4 w-1/2">
+        <div className="flex flex-col justify-start pl-4">
           {filmList.map((film) => (
             <button
               key={film.episode_id}
@@ -45,7 +52,8 @@ export const EpisodeList = () => {
               }`}
               onClick={() => {
                 setItemSelected(film.episode_id);
-                navigate(`/episode/${film.episode_id}`);
+                const episodeIndex = getIdxFromUrl(film.url);
+                navigate(`/episode/${episodeIndex}`);
               }}
             >
               <div className="font-semibold grow text-start">

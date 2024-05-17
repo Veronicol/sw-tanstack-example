@@ -21,7 +21,13 @@ function App() {
   );
 
   useEffect(() => {
-    location.pathname === "/" && navigate("/episode");
+    const paths = location.pathname.split("/");
+    if (paths.length > 1 && !!paths[1]) {
+      const section = paths[1];
+      setCurrentSection(section as Section);
+    } else {
+      navigate("/episode");
+    }
   }, [location]);
 
   return (

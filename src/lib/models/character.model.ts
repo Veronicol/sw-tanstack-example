@@ -1,8 +1,3 @@
-import { Film } from "./film.model";
-import { Species } from "./species.model";
-import { Starship } from "./starship.model";
-import { Vehicle } from "./vehicle.model";
-
 export type Character = {
   name: string;
   birth_year: string;
@@ -13,10 +8,10 @@ export type Character = {
   mass: string;
   skin_color: string;
   homeworld: string;
-  films: Film[];
-  species: Species[];
-  starships: Starship[];
-  vehicles: Vehicle[];
+  films: string[];
+  species: string[];
+  starships: string[];
+  vehicles: string[];
   url: string;
   created: string;
   edited: string;
