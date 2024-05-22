@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { Character } from "../lib/models/character.model";
+import { useCharacterList } from "./hooks/useCharacterList";
 
 export const CharacterList = () => {
   const navigate = useNavigate();
@@ -9,18 +10,24 @@ export const CharacterList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isApiError, setIsApiError] = useState(false);
   const [characterList, setCharacterList] = useState<Character[]>([]);
-  const [itemSelected, setItemSelected] = useState<string>();
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(0);
+
+  const {
+    currentPage,
+    itemSelected,
+    totalPages,
+    changeCurrentPage,
+    selectItem,
+    setTotalPages,
+  } = useCharacterList();
 
   useEffect(() => {
     setIsLoading(true);
     fetch(`https://swapi.dev/api/people/?page=${currentPage}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("🚀 ~ .then ~ data:", data.results[0]);
+        console.log("🚀 ~ .then ~ data:", data.results);
         setCharacterList(data.results);
-        !totalPages && setTotalPages(Math.ceil(data.count / 10));
+        !totalPages && setTotalPages(data.count);
       })
       .catch((error) => {
         console.log("ERROR => ", error.error);
@@ -51,7 +58,7 @@ export const CharacterList = () => {
                     : "bg-white hover:bg-slate-100"
                 }`}
                 onClick={() => {
-                  setItemSelected(character.name);
+                  selectItem(character.name);
                   const characterIndex = getIdxFromUrl(character.url);
                   navigate(`/character/${characterIndex}`);
                 }}
@@ -68,14 +75,14 @@ export const CharacterList = () => {
             </div>
             <button
               className={currentPage === 1 ? "text-gray-400" : ""}
-              onClick={() => setCurrentPage(currentPage - 1)}
+              onClick={() => currentPage && changeCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
             >
               PREV
             </button>
             <button
               className={currentPage === totalPages ? "text-gray-400" : ""}
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => currentPage && changeCurrentPage(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
               NEXT

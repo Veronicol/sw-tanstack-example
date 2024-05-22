@@ -2,14 +2,14 @@ import { Outlet, useParams } from "react-router-dom";
 import { EpisodeList } from "../components/EpisodeList";
 
 export const EpisodeLayout = () => {
-  const { episodeId } = useParams();
+  const { episodeIdx } = useParams();
 
   return (
     <section className="flex gap-x-8 w-full">
       <div className="w-1/2">
-        <EpisodeList />
+        <EpisodeList episodeIdx={episodeIdx} />
       </div>
-      <div className="w-1/2">{episodeId && <Outlet />}</div>
+      <div className="w-1/2">{episodeIdx && <Outlet />}</div>
     </section>
   );
 };

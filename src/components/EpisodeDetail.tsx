@@ -5,7 +5,7 @@ import { Character } from "../lib/models/character.model";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 
 export const EpisodeDetail = () => {
-  const { episodeId } = useParams();
+  const { episodeIdx } = useParams();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -14,9 +14,9 @@ export const EpisodeDetail = () => {
   const [episodeCharacters, setEpisodeCharacters] = useState<Character[]>();
 
   useEffect(() => {
-    if (episodeId) {
+    if (episodeIdx) {
       setIsLoading(true);
-      fetch(`https://swapi.dev/api/films/${episodeId}`)
+      fetch(`https://swapi.dev/api/films/${episodeIdx}`)
         .then((res) => res.json())
         .then((data) => {
           setEpisodeDetail(data);
@@ -26,7 +26,7 @@ export const EpisodeDetail = () => {
           setIsApiError(true);
         });
     }
-  }, [episodeId]);
+  }, [episodeIdx]);
 
   useEffect(() => {
     if (episodeDetail?.characters) {

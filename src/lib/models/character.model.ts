@@ -1,5 +1,5 @@
 export type Character = {
-  name: string;
+  name: string; 
   birth_year: string;
   eye_color: string;
   gender: string;
@@ -7,7 +7,7 @@ export type Character = {
   height: string;
   mass: string;
   skin_color: string;
-  homeworld: string;
+  homeworld: string; 
   films: string[];
   species: string[];
   starships: string[];

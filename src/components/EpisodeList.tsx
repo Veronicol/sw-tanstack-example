@@ -2,22 +2,24 @@ import { useEffect, useState } from "react";
 import { Film } from "../lib/models";
 import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
+import { getEpisodeFromIdx } from "../utils/getEpisodeFromIdx";
 
-export const EpisodeList = () => {
+export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const navigate = useNavigate();
-  // const { episodeId } = useParams;
-  // console.log("🚀 ~ EpisodeList ~ episodeId:", episodeId);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isApiError, setIsApiError] = useState(false);
-  const [filmList, setFilmList] = useState<Film[]>([]);
+  const [episodeList, setEpisodeList] = useState<Film[]>([]);
   const [itemSelected, setItemSelected] = useState<number>();
 
   useEffect(() => {
     fetch("https://swapi.dev/api/films")
       .then((res) => res.json())
       .then((data) => {
-        setFilmList(data.results);
+        const sortedResults = data.results.sort(
+          (a: Film, b: Film) => a.episode_id - b.episode_id
+        );
+        setEpisodeList(sortedResults);
       })
       .catch((error) => {
         console.log("ERROR => ", error.error);
@@ -26,9 +28,12 @@ export const EpisodeList = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // useEffect(() => {
-  //   episodeId && setItemSelected(episodeId);
-  // }, [episodeId]);
+  useEffect(() => {
+    if (episodeIdx) {
+      const episode = getEpisodeFromIdx(episodeList, episodeIdx);
+      episode && setItemSelected(episode.episode_id);
+    }
+  }, [episodeIdx, episodeList]);
 
   return (
     <>
@@ -42,7 +47,7 @@ export const EpisodeList = () => {
         </div>
       ) : (
         <div className="flex flex-col justify-start pl-4">
-          {filmList.map((film) => (
+          {episodeList.map((film) => (
             <button
               key={film.episode_id}
               className={`border-b border-1 border-gray-400 w-full p-2 flex ${

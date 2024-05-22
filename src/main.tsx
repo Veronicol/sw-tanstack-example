@@ -23,7 +23,7 @@ const router = createBrowserRouter([
         element: <EpisodeLayout />,
         children: [
           {
-            path: ":episodeId",
+            path: ":episodeIdx",
             element: <EpisodeDetail />,
           },
         ],
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
         element: <CharacterLayout />,
         children: [
           {
-            path: ":characterId",
+            path: ":characterIdx",
             element: <CharacterDetail />,
           },
         ],
