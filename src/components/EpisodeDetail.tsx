@@ -4,26 +4,29 @@ import { Film } from "../lib/models";
 import { Character } from "../lib/models/character.model";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 
+const fetchEpisode = (idx: string): Promise<Film> =>
+  fetch(`https://swapi.dev/api/films/${idx}`).then((res) => res.json());
+
 export const EpisodeDetail = () => {
   const { episodeIdx } = useParams();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isApiError, setIsApiError] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [episodeDetail, setEpisodeDetail] = useState<Film>();
   const [episodeCharacters, setEpisodeCharacters] = useState<Character[]>();
 
   useEffect(() => {
     if (episodeIdx) {
       setIsLoading(true);
-      fetch(`https://swapi.dev/api/films/${episodeIdx}`)
-        .then((res) => res.json())
+
+      fetchEpisode(episodeIdx)
         .then((data) => {
           setEpisodeDetail(data);
         })
         .catch((error) => {
           console.log("ERROR => ", error.error);
-          setIsApiError(true);
+          setIsError(true);
         });
     }
   }, [episodeIdx]);
@@ -49,15 +52,15 @@ export const EpisodeDetail = () => {
   return (
     <>
       {isLoading ? (
-        <div className="h-80 flex justify-center items-center">
+        <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
-      ) : isApiError ? (
-        <div className="text-2xl h-20 flex justify-center items-center">
+      ) : isError ? (
+        <div className="flex items-center justify-center h-20 text-2xl">
           Ooops... something went wrong
         </div>
       ) : (
-        <div className="flex flex-col justify-start p-4 border border-1 rounded-xl border-gray-400">
+        <div className="flex flex-col justify-start p-4 border border-gray-400 border-1 rounded-xl">
           <div className="text-2xl font-semibold">{episodeDetail?.title}</div>
           <div className="m-2">
             <div>

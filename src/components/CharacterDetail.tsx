@@ -3,26 +3,28 @@ import { useParams } from "react-router-dom";
 import { Character } from "../lib/models/character.model";
 import { Planet } from "../lib/models/planet.model";
 
+const fetchCharacter = (idx: string): Promise<Character> =>
+  fetch(`https://swapi.dev/api/people/${idx}`).then((res) => res.json());
 
 export const CharacterDetail = () => {
   const { characterIdx } = useParams();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isApiError, setIsApiError] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [characterDetail, setCharacterDetail] = useState<Character>();
   const [characterData, setCharacterData] = useState<Planet>();
 
   useEffect(() => {
     if (characterIdx) {
       setIsLoading(true);
-      fetch(`https://swapi.dev/api/people/${characterIdx}`)
-        .then((res) => res.json())
+
+      fetchCharacter(characterIdx)
         .then((data) => {
           setCharacterDetail(data);
         })
         .catch((error) => {
           console.log("ERROR => ", error.error);
-          setIsApiError(true);
+          setIsError(true);
         });
     }
   }, [characterIdx]);
@@ -32,17 +34,12 @@ export const CharacterDetail = () => {
       const { homeworld } = characterDetail;
 
       const fetchHomeworld = () => {
-          return fetch(homeworld).then(
-            (res) => res.json()
-          );
-      }
+        return fetch(homeworld).then((res) => res.json());
+      };
 
-      Promise.all(
-        [fetchHomeworld()]
-      )
+      Promise.all([fetchHomeworld()])
         .then((dataList) => {
-          console.log("🚀 ~ .then ~ dataList:", dataList)
-          setCharacterData(dataList[0])
+          setCharacterData(dataList[0]);
         })
         .catch((error) => {
           console.log("ERROR => ", error.error);
@@ -57,7 +54,7 @@ export const CharacterDetail = () => {
         <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
-      ) : isApiError ? (
+      ) : isError ? (
         <div className="flex items-center justify-center h-20 text-2xl">
           Ooops... something went wrong
         </div>
@@ -71,27 +68,45 @@ export const CharacterDetail = () => {
             </div>
             <div className="mb-2">
               Birth year:
-              <span className="font-semibold"> {characterDetail?.birth_year || '-'}</span>
+              <span className="font-semibold">
+                {" "}
+                {characterDetail?.birth_year || "-"}
+              </span>
             </div>
             <div className="mb-2">
               Eye color:
-              <span className="font-semibold"> {characterDetail?.eye_color || '-'}</span>
+              <span className="font-semibold">
+                {" "}
+                {characterDetail?.eye_color || "-"}
+              </span>
             </div>
             <div className="mb-2">
               Hair color:
-              <span className="font-semibold"> {characterDetail?.hair_color || '-'}</span>
+              <span className="font-semibold">
+                {" "}
+                {characterDetail?.hair_color || "-"}
+              </span>
             </div>
             <div className="mb-2">
               Height:
-              <span className="font-semibold"> {characterDetail?.height || '-'} cm</span>
+              <span className="font-semibold">
+                {" "}
+                {characterDetail?.height || "-"} cm
+              </span>
             </div>
             <div className="mb-2">
               Mass:
-              <span className="font-semibold"> {characterDetail?.mass || '-'} kg</span>
+              <span className="font-semibold">
+                {" "}
+                {characterDetail?.mass || "-"} kg
+              </span>
             </div>
             <div className="mb-2">
               Home World:
-              <span className="font-semibold"> {characterData?.name || '-'}</span>
+              <span className="font-semibold">
+                {" "}
+                {characterData?.name || "-"}
+              </span>
             </div>
           </div>
         </div>

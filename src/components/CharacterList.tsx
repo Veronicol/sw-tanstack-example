@@ -3,12 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { Character } from "../lib/models/character.model";
 import { useCharacterList } from "./hooks/useCharacterList";
+import { SwResponse } from "../lib/models/sw-response.model";
+
+const fetchCharacters = (page: number): Promise<SwResponse<Character>> =>
+  fetch(`https://swapi.dev/api/people/?page=${page}`).then((res) => res.json());
 
 export const CharacterList = () => {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isApiError, setIsApiError] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [characterList, setCharacterList] = useState<Character[]>([]);
 
   const {
@@ -22,16 +26,15 @@ export const CharacterList = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch(`https://swapi.dev/api/people/?page=${currentPage}`)
-      .then((res) => res.json())
+
+    fetchCharacters(currentPage || 0)
       .then((data) => {
-        console.log("🚀 ~ .then ~ data:", data.results);
         setCharacterList(data.results);
         !totalPages && setTotalPages(data.count);
       })
       .catch((error) => {
         console.log("ERROR => ", error.error);
-        setIsApiError(true);
+        setIsError(true);
       })
       .finally(() => setIsLoading(false));
   }, [currentPage]);
@@ -39,11 +42,11 @@ export const CharacterList = () => {
   return (
     <>
       {isLoading ? (
-        <div className="h-80 flex justify-center items-center">
+        <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
-      ) : isApiError ? (
-        <div className="text-2xl h-20 flex justify-center items-center">
+      ) : isError ? (
+        <div className="flex items-center justify-center h-20 text-2xl">
           Ooops... something went wrong
         </div>
       ) : (
@@ -69,8 +72,8 @@ export const CharacterList = () => {
               </button>
             ))}
           </div>
-          <div className="mt-4 flex justify-end gap-4 items-end">
-            <div className="text-gray-500 text-sm">
+          <div className="flex items-end justify-end gap-4 mt-4">
+            <div className="text-sm text-gray-500">
               page {currentPage} of {totalPages}
             </div>
             <button
