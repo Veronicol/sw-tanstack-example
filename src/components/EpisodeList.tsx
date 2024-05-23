@@ -3,6 +3,7 @@ import { Film } from "../lib/models";
 import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { getEpisodeFromIdx } from "../utils/getEpisodeFromIdx";
+import { SwResponse } from "../lib/models/sw-response.model";
 
 export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const navigate = useNavigate();
@@ -12,14 +13,14 @@ export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const [episodeList, setEpisodeList] = useState<Film[]>([]);
   const [itemSelected, setItemSelected] = useState<number>();
 
-  const fetchEpisodes = () =>
+  const fetchEpisodes = (): Promise<SwResponse<Film>> =>
     fetch("https://swapi.dev/api/films").then((res) => res.json());
 
   useEffect(() => {
     fetchEpisodes()
       .then((data) => {
         const sortedResults = data.results.sort(
-          (a: Film, b: Film) => a.episode_id - b.episode_id
+          (a, b) => a.episode_id - b.episode_id
         );
         setEpisodeList(sortedResults);
       })
