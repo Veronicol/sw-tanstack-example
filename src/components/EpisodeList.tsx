@@ -5,16 +5,16 @@ import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { getEpisodeFromIdx } from "../utils/getEpisodeFromIdx";
 import { SwResponse } from "../lib/models/sw-response.model";
 
+const fetchEpisodes = (): Promise<SwResponse<Film>> =>
+  fetch("https://swapi.dev/api/films").then((res) => res.json());
+
 export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isApiError, setIsApiError] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [episodeList, setEpisodeList] = useState<Film[]>([]);
   const [itemSelected, setItemSelected] = useState<number>();
-
-  const fetchEpisodes = (): Promise<SwResponse<Film>> =>
-    fetch("https://swapi.dev/api/films").then((res) => res.json());
 
   useEffect(() => {
     fetchEpisodes()
@@ -26,7 +26,7 @@ export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
       })
       .catch((error) => {
         console.log("ERROR => ", error.error);
-        setIsApiError(true);
+        setIsError(true);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -44,7 +44,7 @@ export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
         <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
-      ) : isApiError ? (
+      ) : isError ? (
         <div className="flex items-center justify-center h-20 text-2xl">
           Ooops... something went wrong
         </div>
