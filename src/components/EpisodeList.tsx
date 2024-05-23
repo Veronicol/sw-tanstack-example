@@ -12,9 +12,11 @@ export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const [episodeList, setEpisodeList] = useState<Film[]>([]);
   const [itemSelected, setItemSelected] = useState<number>();
 
+  const fetchEpisodes = () =>
+    fetch("https://swapi.dev/api/films").then((res) => res.json());
+
   useEffect(() => {
-    fetch("https://swapi.dev/api/films")
-      .then((res) => res.json())
+    fetchEpisodes()
       .then((data) => {
         const sortedResults = data.results.sort(
           (a: Film, b: Film) => a.episode_id - b.episode_id
@@ -38,11 +40,11 @@ export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   return (
     <>
       {isLoading ? (
-        <div className="h-80 flex justify-center items-center">
+        <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
       ) : isApiError ? (
-        <div className="text-2xl h-20 flex justify-center items-center">
+        <div className="flex items-center justify-center h-20 text-2xl">
           Ooops... something went wrong
         </div>
       ) : (
