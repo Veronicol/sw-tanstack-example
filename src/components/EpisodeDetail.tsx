@@ -4,8 +4,13 @@ import { Film } from "../lib/models";
 import { Character } from "../lib/models/character.model";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 
-const fetchEpisode = (idx: string): Promise<Film> =>
-  fetch(`https://swapi.dev/api/films/${idx}`).then((res) => res.json());
+const fetchEpisode = async (idx: string): Promise<Film>  => {
+  const response = await fetch(`https://swapi.dev/api/films/${idx}`);
+  if (!response.ok) {
+    throw new Error('SW response was not OK');
+  }
+  return response.json();
+}
 
 export const EpisodeDetail = () => {
   const { episodeIdx } = useParams();
