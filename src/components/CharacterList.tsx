@@ -5,8 +5,13 @@ import { Character } from "../lib/models/character.model";
 import { useCharacterList } from "./hooks/useCharacterList";
 import { SwResponse } from "../lib/models/sw-response.model";
 
-const fetchCharacters = (page: number): Promise<SwResponse<Character>> =>
-  fetch(`https://swapi.dev/api/people/?page=${page}`).then((res) => res.json());
+const fetchCharacters = async  (page: number): Promise<SwResponse<Character>> => {
+  const response = await fetch(`https://swapi.dev/api/people/?page=${page}`);
+  if (!response.ok) {
+    throw new Error('SW response was not OK');
+  }
+  return response.json();
+}
 
 export const CharacterList = () => {
   const navigate = useNavigate();

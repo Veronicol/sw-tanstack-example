@@ -3,8 +3,13 @@ import { useParams } from "react-router-dom";
 import { Character } from "../lib/models/character.model";
 import { Planet } from "../lib/models/planet.model";
 
-const fetchCharacter = (idx: string): Promise<Character> =>
-  fetch(`https://swapi.dev/api/people/${idx}`).then((res) => res.json());
+const fetchCharacter = async (idx: string): Promise<Character> => {
+  const response = await fetch(`https://swapi.dev/api/people/${idx}`);
+  if (!response.ok) {
+    throw new Error('SW response was not OK');
+  }
+  return response.json();
+}
 
 export const CharacterDetail = () => {
   const { characterIdx } = useParams();

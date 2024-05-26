@@ -5,8 +5,13 @@ import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { getEpisodeFromIdx } from "../utils/getEpisodeFromIdx";
 import { SwResponse } from "../lib/models/sw-response.model";
 
-const fetchEpisodes = (): Promise<SwResponse<Film>> =>
-  fetch("https://swapi.dev/api/films").then((res) => res.json());
+const fetchEpisodes = async (): Promise<SwResponse<Film>> => {
+  const response = await fetch("https://swapi.dev/api/films");
+  if (!response.ok) {
+    throw new Error('SW response was not OK');
+  }
+  return response.json();
+}
 
 export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const navigate = useNavigate();
