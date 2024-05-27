@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { getEpisodeFromIdx } from "../utils/getEpisodeFromIdx";
 import { SwResponse } from "../lib/models/sw-response.model";
+import { useQuery } from "@tanstack/react-query";
 
 const fetchEpisodes = async (): Promise<SwResponse<Film>> => {
   const response = await fetch("https://swapi.dev/api/films");
@@ -15,26 +16,19 @@ const fetchEpisodes = async (): Promise<SwResponse<Film>> => {
 
 export const EpisodeList = ({ episodeIdx }: { episodeIdx?: string }) => {
   const navigate = useNavigate();
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [episodeList, setEpisodeList] = useState<Film[]>([]);
   const [itemSelected, setItemSelected] = useState<number>();
 
-  useEffect(() => {
-    fetchEpisodes()
-      .then((data) => {
-        const sortedResults = data.results.sort(
-          (a, b) => a.episode_id - b.episode_id
-        );
-        setEpisodeList(sortedResults);
-      })
-      .catch((error) => {
-        console.log("ERROR => ", error.error);
-        setIsError(true);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const queryResult = useQuery({
+    queryKey: ["episodes"],
+    queryFn: fetchEpisodes,
+    // refetchOnWindowFocus: false,
+    staleTime: 3000,
+    gcTime: 6000
+  });
+
+  const { data, isLoading, isError } = queryResult;
+  const episodeList: Film[] = data?.results || [];
+  //const episodeList: Film[] = useMemo(() => data?.results || [], [data]);
 
   useEffect(() => {
     if (episodeIdx) {
