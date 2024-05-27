@@ -3,9 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Film } from "../lib/models";
 import { Character } from "../lib/models/character.model";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
+import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
 
-const fetchEpisode = async (idx: string): Promise<Film>  => {
-  const response = await fetch(`https://swapi.dev/api/films/${idx}`);
+// const fetchEpisode = async (idx: string): Promise<Film>  => {
+//   const response = await fetch(`https://swapi.dev/api/films/${idx}`);
+//   if (!response.ok) {
+//     throw new Error('SW response was not OK');
+//   }
+//   return response.json();
+// }
+
+const fetchEpisode = async ({queryKey}: QueryFunctionContext): Promise<Film>  => {
+  const [_episodeKey, episodeIdx]  = queryKey;
+  const response = await fetch(`https://swapi.dev/api/films/${episodeIdx}`);
   if (!response.ok) {
     throw new Error('SW response was not OK');
   }
@@ -16,25 +26,18 @@ export const EpisodeDetail = () => {
   const { episodeIdx } = useParams();
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [episodeDetail, setEpisodeDetail] = useState<Film>();
   const [episodeCharacters, setEpisodeCharacters] = useState<Character[]>();
 
-  useEffect(() => {
-    if (episodeIdx) {
-      setIsLoading(true);
+  const queryResult = useQuery({
+    queryKey: ['episode', episodeIdx],
+    // aquí tenemos dos opciones: coger la queryKey del contexto que se le pasa, o arrow fn
+    // queryFn: () => fetchEpisode(episodeIdx)
+    queryFn: fetchEpisode
+  })
 
-      fetchEpisode(episodeIdx)
-        .then((data) => {
-          setEpisodeDetail(data);
-        })
-        .catch((error) => {
-          console.log("ERROR => ", error.error);
-          setIsError(true);
-        });
-    }
-  }, [episodeIdx]);
+  const { data, isLoading, isError} = queryResult;
+  const episodeDetail = data;
+
 
   useEffect(() => {
     if (episodeDetail?.characters) {
@@ -50,7 +53,7 @@ export const EpisodeDetail = () => {
         .catch((error) => {
           console.log("ERROR => ", error.error);
         })
-        .finally(() => setIsLoading(false));
+        // .finally(() => setIsLoading(false));
     }
   }, [episodeDetail]);
 
