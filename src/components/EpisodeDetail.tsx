@@ -22,6 +22,14 @@ const fetchEpisode = async ({queryKey}: QueryFunctionContext): Promise<Film>  =>
   return response.json();
 }
 
+const fetchCharacter = async (idx: string): Promise<Character> => {
+  const response = await fetch(`https://swapi.dev/api/people/${idx}`);
+  if (!response.ok) {
+    throw new Error('SW response was not OK');
+  }
+  return response.json();
+}
+
 export const EpisodeDetail = () => {
   const { episodeIdx } = useParams();
   const navigate = useNavigate();
@@ -44,9 +52,7 @@ export const EpisodeDetail = () => {
       Promise.all(
         episodeDetail.characters.map((character) => {
           const characterIdx = getIdxFromUrl(character);
-          return fetch(`https://swapi.dev/api/people/${characterIdx}`).then(
-            (res) => res.json()
-          );
+          return fetchCharacter(characterIdx)
         })
       )
         .then((dataList) => setEpisodeCharacters(dataList))
