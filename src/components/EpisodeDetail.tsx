@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Film } from "../lib/models";
 import { Character } from "../lib/models/character.model";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
-import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
+import {
+  QueryFunctionContext,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
 
 // const fetchEpisode = async (idx: string): Promise<Film>  => {
 //   const response = await fetch(`https://swapi.dev/api/films/${idx}`);
@@ -13,63 +16,77 @@ import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
 //   return response.json();
 // }
 
-const fetchEpisode = async ({queryKey}: QueryFunctionContext): Promise<Film>  => {
-  const [_episodeKey, episodeIdx]  = queryKey;
+const fetchEpisode = async ({
+  queryKey,
+}: QueryFunctionContext): Promise<Film> => {
+  const [_episodeKey, episodeIdx] = queryKey;
   const response = await fetch(`https://swapi.dev/api/films/${episodeIdx}`);
   if (!response.ok) {
-    throw new Error('SW response was not OK');
+    throw new Error("SW response was not OK");
   }
   return response.json();
-}
+};
 
 const fetchCharacter = async (idx: string): Promise<Character> => {
   const response = await fetch(`https://swapi.dev/api/people/${idx}`);
   if (!response.ok) {
-    throw new Error('SW response was not OK');
+    throw new Error("SW response was not OK");
   }
   return response.json();
-}
+};
 
 export const EpisodeDetail = () => {
   const { episodeIdx } = useParams();
   const navigate = useNavigate();
 
-  const [episodeCharacters, setEpisodeCharacters] = useState<Character[]>();
-
-  const queryResult = useQuery({
-    queryKey: ['episode', episodeIdx],
+  const episodeQueryResult = useQuery({
+    queryKey: ["episode", episodeIdx],
     // aquí tenemos dos opciones: coger la queryKey del contexto que se le pasa, o arrow fn
-    // queryFn: () => fetchEpisode(episodeIdx)
-    queryFn: fetchEpisode
-  })
+    // queryFn: () => fetchEpisode(episodeIdx || '')
+    // enabled: !!episodeIdx
+    queryFn: fetchEpisode,
+  });
 
-  const { data, isLoading, isError} = queryResult;
-  const episodeDetail = data;
+  const {
+    data: episodeData,
+    isLoading: isEpisodeLoading,
+    isError: isEpisodeError,
+  } = episodeQueryResult;
+  const episodeDetail = episodeData;
 
-
-  useEffect(() => {
-    if (episodeDetail?.characters) {
-      Promise.all(
-        episodeDetail.characters.map((character) => {
-          const characterIdx = getIdxFromUrl(character);
-          return fetchCharacter(characterIdx)
+  const charactersQueryResult = useQueries({
+    queries: episodeDetail?.characters
+      ? episodeDetail.characters.map((characterUrl) => {
+          const characterIdx = getIdxFromUrl(characterUrl);
+          return {
+            queryKey: ["character", characterIdx],
+            queryFn: () => fetchCharacter(characterIdx),
+          };
         })
-      )
-        .then((dataList) => setEpisodeCharacters(dataList))
-        .catch((error) => {
-          console.log("ERROR => ", error.error);
-        })
-        // .finally(() => setIsLoading(false));
-    }
-  }, [episodeDetail]);
+      : [],
+    combine: (results) => {
+      return {
+        data: results.map((result) => result.data) as Character[],
+        loading: results.some((result) => result.isLoading),
+        error: results.some((result) => result.isError),
+      };
+    },
+  });
+
+  const {
+    data: charactersData,
+    loading: isCharactersLoading,
+    error: isCharactersError,
+  } = charactersQueryResult;
+  const episodeCharacters = charactersData;
 
   return (
     <>
-      {isLoading ? (
+      {isEpisodeLoading || isCharactersLoading ? (
         <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
-      ) : isError ? (
+      ) : isEpisodeError || isCharactersError ? (
         <div className="flex items-center justify-center h-20 text-2xl">
           Ooops... something went wrong
         </div>
