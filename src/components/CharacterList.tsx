@@ -5,13 +5,15 @@ import { Character } from "../lib/models/character.model";
 import { useCharacterList } from "./hooks/useCharacterList";
 import { SwResponse } from "../lib/models/sw-response.model";
 
-const fetchCharacters = async  (page: number): Promise<SwResponse<Character>> => {
+const fetchCharacters = async (
+  page: number
+): Promise<SwResponse<Character>> => {
   const response = await fetch(`https://swapi.dev/api/people/?page=${page}`);
   if (!response.ok) {
-    throw new Error('SW response was not OK');
+    throw new Error("SW response was not OK");
   }
   return response.json();
-}
+};
 
 export const CharacterList = () => {
   const navigate = useNavigate();
@@ -20,14 +22,8 @@ export const CharacterList = () => {
   const [isError, setIsError] = useState(false);
   const [characterList, setCharacterList] = useState<Character[]>([]);
 
-  const {
-    currentPage,
-    itemSelected,
-    totalPages,
-    changeCurrentPage,
-    selectItem,
-    setTotalPages,
-  } = useCharacterList();
+  const { currentPage, itemSelected, changeCurrentPage, selectItem } =
+    useCharacterList();
 
   useEffect(() => {
     setIsLoading(true);
@@ -35,7 +31,6 @@ export const CharacterList = () => {
     fetchCharacters(currentPage || 0)
       .then((data) => {
         setCharacterList(data.results);
-        !totalPages && setTotalPages(data.count);
       })
       .catch((error) => {
         console.log("ERROR => ", error.error);
@@ -78,9 +73,7 @@ export const CharacterList = () => {
             ))}
           </div>
           <div className="flex items-end justify-end gap-4 mt-4">
-            <div className="text-sm text-gray-500">
-              page {currentPage} of {totalPages}
-            </div>
+            <div className="text-sm text-gray-500">page {currentPage}</div>
             <button
               className={currentPage === 1 ? "text-gray-400" : ""}
               onClick={() => currentPage && changeCurrentPage(currentPage - 1)}
@@ -89,9 +82,9 @@ export const CharacterList = () => {
               PREV
             </button>
             <button
-              className={currentPage === totalPages ? "text-gray-400" : ""}
+              // className={isDisabled ? "text-gray-400" : ""}
               onClick={() => currentPage && changeCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              // disabled={isDisabled}
             >
               NEXT
             </button>
