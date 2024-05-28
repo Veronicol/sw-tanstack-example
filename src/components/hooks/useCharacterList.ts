@@ -2,19 +2,16 @@ import { useReducer } from "react";
 
 type CharacterListState = {
   itemSelected?: string;
-  currentPage?: number;
-  totalPages: number;
+  currentPage: number;
 };
 
 const initialState: CharacterListState = {
-  totalPages: 0,
   currentPage: 1,
 };
 
 enum actionTypes {
   CHANGE_CURRENT_PAGE = "CHANGE_CURRENT_PAGE",
   SELECT_ITEM = "SELECT_ITEM",
-  SET_TOTAL_PAGES = "SET_TOTAL_PAGES",
 }
 
 type ChangeCurrentPageAction = {
@@ -27,17 +24,9 @@ type SelectItemAction = {
   payload: string;
 };
 
-type SetTotalPagesmAction = {
-  type: actionTypes.SET_TOTAL_PAGES;
-  payload: number;
-};
-
 const characterListReducer = (
   state: CharacterListState,
-  {
-    type,
-    payload,
-  }: ChangeCurrentPageAction | SelectItemAction | SetTotalPagesmAction
+  { type, payload }: ChangeCurrentPageAction | SelectItemAction
 ): CharacterListState => {
   switch (type) {
     case actionTypes.CHANGE_CURRENT_PAGE: {
@@ -52,13 +41,6 @@ const characterListReducer = (
         itemSelected: payload,
       };
     }
-    case actionTypes.SET_TOTAL_PAGES: {
-      return {
-        ...state,
-        totalPages: payload,
-      };
-    }
-
     default: {
       return state;
     }
@@ -67,7 +49,7 @@ const characterListReducer = (
 
 export const useCharacterList = () => {
   const [state, dispatch] = useReducer(characterListReducer, initialState);
-  const { currentPage, itemSelected, totalPages } = state;
+  const { currentPage, itemSelected } = state;
 
   const changeCurrentPage = (newPage: number) => {
     dispatch({
@@ -83,19 +65,10 @@ export const useCharacterList = () => {
     });
   };
 
-  const setTotalPages = (items: number) => {
-    dispatch({
-      type: actionTypes.SET_TOTAL_PAGES,
-      payload: Math.ceil(items / 10),
-    });
-  };
-
   return {
     currentPage,
     itemSelected,
-    totalPages,
     changeCurrentPage,
     selectItem,
-    setTotalPages,
   };
 };
