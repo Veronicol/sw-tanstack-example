@@ -1,3 +1,4 @@
+import { Fragment, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { Character } from "../lib/models/character.model";
@@ -17,6 +18,7 @@ const fetchCharacters = async (
 
 export const CharacterList = () => {
   const navigate = useNavigate();
+  const characterListContainer = useRef<HTMLDivElement>(null);
 
   const { currentPage, itemSelected, changeCurrentPage, selectItem } =
     useCharacterList();
@@ -32,6 +34,13 @@ export const CharacterList = () => {
   const { data, isFetching, isError, hasNextPage, fetchNextPage } =
     charactersQueryResult;
 
+  useEffect(() => {
+    if (characterListContainer.current) {
+      characterListContainer.current.scrollTop =
+        characterListContainer.current.scrollHeight;
+    }
+  }, [data?.pages]);
+
   return (
     <>
       {isFetching ? (
@@ -44,40 +53,35 @@ export const CharacterList = () => {
         </div>
       ) : (
         <div className="flex flex-col">
-          <div className="flex flex-col justify-start pl-4">
-            {data?.pages[currentPage - 1].results.map((character) => (
-              <button
-                key={character.name}
-                className={`border-b border-1 border-gray-400 w-full p-2 flex ${
-                  itemSelected === character.name
-                    ? "bg-slate-200"
-                    : "bg-white hover:bg-slate-100"
-                }`}
-                onClick={() => {
-                  selectItem(character.name);
-                  const characterIndex = getIdxFromUrl(character.url);
-                  navigate(`/character/${characterIndex}`);
-                }}
-              >
-                <div className="font-semibold grow text-start">
-                  {character.name}
-                </div>
-              </button>
+          <div
+            ref={characterListContainer}
+            className="flex flex-col justify-start pl-4 h-[410px] overflow-scroll"
+          >
+            {data?.pages.map((page, idx) => (
+              <Fragment key={idx}>
+                {page.results.map((character) => (
+                  <button
+                    key={character.name}
+                    className={`border-b border-1 border-gray-400 w-full p-2 flex ${
+                      itemSelected === character.name
+                        ? "bg-slate-200"
+                        : "bg-white hover:bg-slate-100"
+                    }`}
+                    onClick={() => {
+                      selectItem(character.name);
+                      const characterIndex = getIdxFromUrl(character.url);
+                      navigate(`/character/${characterIndex}`);
+                    }}
+                  >
+                    <div className="font-semibold grow text-start">
+                      {character.name}
+                    </div>
+                  </button>
+                ))}
+              </Fragment>
             ))}
           </div>
           <div className="flex items-end justify-end gap-4 mt-4">
-            <div className="text-sm text-gray-500">page {currentPage}</div>
-            <button
-              className={currentPage === 1 ? "text-gray-400" : ""}
-              onClick={() => {
-                if (currentPage) {
-                  changeCurrentPage(currentPage - 1);
-                }
-              }}
-              disabled={currentPage === 1}
-            >
-              PREV
-            </button>
             <button
               className={
                 data?.pages.length === currentPage && !hasNextPage
@@ -90,7 +94,7 @@ export const CharacterList = () => {
               }}
               disabled={data?.pages.length === currentPage && !hasNextPage}
             >
-              NEXT
+              LOAD MORE...
             </button>
           </div>
         </div>
