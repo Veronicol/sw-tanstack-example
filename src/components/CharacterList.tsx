@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { Character } from "../lib/models/character.model";
 import { useCharacterList } from "./hooks/useCharacterList";
 import { SwResponse } from "../lib/models/sw-response.model";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 const fetchCharacters = async (
-  page: number
+  pageParam: string
 ): Promise<SwResponse<Character>> => {
-  const response = await fetch(`https://swapi.dev/api/people/?page=${page}`);
+  const response = await fetch(pageParam);
   if (!response.ok) {
     throw new Error("SW response was not OK");
   }
@@ -18,30 +18,23 @@ const fetchCharacters = async (
 export const CharacterList = () => {
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [characterList, setCharacterList] = useState<Character[]>([]);
-
   const { currentPage, itemSelected, changeCurrentPage, selectItem } =
     useCharacterList();
 
-  useEffect(() => {
-    setIsLoading(true);
+  const charactersQueryResult = useInfiniteQuery({
+    queryKey: ["characters"],
+    queryFn: ({ pageParam }) => fetchCharacters(pageParam),
+    initialPageParam: "https://swapi.dev/api/people/?page=1",
+    staleTime: 24 * 60 * 60 * 1000, // one day - stablish per default
+    getNextPageParam: (lastPage) => lastPage.next,
+  });
 
-    fetchCharacters(currentPage || 0)
-      .then((data) => {
-        setCharacterList(data.results);
-      })
-      .catch((error) => {
-        console.log("ERROR => ", error.error);
-        setIsError(true);
-      })
-      .finally(() => setIsLoading(false));
-  }, [currentPage]);
+  const { data, isFetching, isError, hasNextPage, fetchNextPage } =
+    charactersQueryResult;
 
   return (
     <>
-      {isLoading ? (
+      {isFetching ? (
         <div className="flex items-center justify-center h-80">
           <span className="loader"></span>
         </div>
@@ -52,7 +45,7 @@ export const CharacterList = () => {
       ) : (
         <div className="flex flex-col">
           <div className="flex flex-col justify-start pl-4">
-            {characterList.map((character) => (
+            {data?.pages[currentPage - 1].results.map((character) => (
               <button
                 key={character.name}
                 className={`border-b border-1 border-gray-400 w-full p-2 flex ${
@@ -76,15 +69,26 @@ export const CharacterList = () => {
             <div className="text-sm text-gray-500">page {currentPage}</div>
             <button
               className={currentPage === 1 ? "text-gray-400" : ""}
-              onClick={() => currentPage && changeCurrentPage(currentPage - 1)}
+              onClick={() => {
+                if (currentPage) {
+                  changeCurrentPage(currentPage - 1);
+                }
+              }}
               disabled={currentPage === 1}
             >
               PREV
             </button>
             <button
-              // className={isDisabled ? "text-gray-400" : ""}
-              onClick={() => currentPage && changeCurrentPage(currentPage + 1)}
-              // disabled={isDisabled}
+              className={
+                data?.pages.length === currentPage && !hasNextPage
+                  ? "text-gray-400"
+                  : ""
+              }
+              onClick={() => {
+                data?.pages.length === currentPage && fetchNextPage();
+                changeCurrentPage(currentPage + 1);
+              }}
+              disabled={data?.pages.length === currentPage && !hasNextPage}
             >
               NEXT
             </button>
