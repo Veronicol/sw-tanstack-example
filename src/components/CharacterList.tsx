@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIdxFromUrl } from "../utils/getIdxFromUrl";
 import { Character } from "../lib/models/character.model";
@@ -22,6 +22,8 @@ export const CharacterList = () => {
   const [isError, setIsError] = useState(false);
   const [characterList, setCharacterList] = useState<Character[]>([]);
 
+  const characterListContainer = useRef<HTMLDivElement>(null);
+
   const { currentPage, itemSelected, changeCurrentPage, selectItem } =
     useCharacterList();
 
@@ -30,7 +32,7 @@ export const CharacterList = () => {
 
     fetchCharacters(currentPage || 0)
       .then((data) => {
-        setCharacterList(data.results);
+        setCharacterList([...characterList, ...data.results]);
       })
       .catch((error) => {
         console.log("ERROR => ", error.error);
@@ -38,6 +40,13 @@ export const CharacterList = () => {
       })
       .finally(() => setIsLoading(false));
   }, [currentPage]);
+
+  useEffect(() => {
+    if (characterListContainer.current) {
+      characterListContainer.current.scrollTop =
+        characterListContainer.current.scrollHeight;
+    }
+  }, [characterList]);
 
   return (
     <>
@@ -51,7 +60,10 @@ export const CharacterList = () => {
         </div>
       ) : (
         <div className="flex flex-col">
-          <div className="flex flex-col justify-start pl-4">
+          <div
+            ref={characterListContainer}
+            className="flex flex-col justify-start pl-4 h-[410px] overflow-scroll"
+          >
             {characterList.map((character) => (
               <button
                 key={character.name}
@@ -73,20 +85,12 @@ export const CharacterList = () => {
             ))}
           </div>
           <div className="flex items-end justify-end gap-4 mt-4">
-            <div className="text-sm text-gray-500">page {currentPage}</div>
-            <button
-              className={currentPage === 1 ? "text-gray-400" : ""}
-              onClick={() => currentPage && changeCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              PREV
-            </button>
             <button
               // className={isDisabled ? "text-gray-400" : ""}
               onClick={() => currentPage && changeCurrentPage(currentPage + 1)}
               // disabled={isDisabled}
             >
-              NEXT
+              LOAD MORE...
             </button>
           </div>
         </div>
