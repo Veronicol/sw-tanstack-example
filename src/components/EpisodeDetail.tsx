@@ -8,24 +8,24 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 
-// const fetchEpisode = async (idx: string): Promise<Film>  => {
-//   const response = await fetch(`https://swapi.dev/api/films/${idx}`);
-//   if (!response.ok) {
-//     throw new Error('SW response was not OK');
-//   }
-//   return response.json();
-// }
-
-const fetchEpisode = async ({
-  queryKey,
-}: QueryFunctionContext): Promise<Film> => {
-  const [_episodeKey, episodeIdx] = queryKey;
-  const response = await fetch(`https://swapi.dev/api/films/${episodeIdx}`);
+const fetchEpisode = async (idx: string): Promise<Film> => {
+  const response = await fetch(`https://swapi.dev/api/films/${idx}`);
   if (!response.ok) {
     throw new Error("SW response was not OK");
   }
   return response.json();
 };
+
+// const fetchEpisode = async ({
+//   queryKey,
+// }: QueryFunctionContext): Promise<Film> => {
+//   const [_episodeKey, episodeIdx] = queryKey;
+//   const response = await fetch(`https://swapi.dev/api/films/${episodeIdx}`);
+//   if (!response.ok) {
+//     throw new Error("SW response was not OK");
+//   }
+//   return response.json();
+// };
 
 const fetchCharacter = async (idx: string): Promise<Character> => {
   const response = await fetch(`https://swapi.dev/api/people/${idx}`);
@@ -42,17 +42,16 @@ export const EpisodeDetail = () => {
   const episodeQueryResult = useQuery({
     queryKey: ["episode", episodeIdx],
     // aquí tenemos dos opciones: coger la queryKey del contexto que se le pasa, o arrow fn
-    // queryFn: () => fetchEpisode(episodeIdx || '')
-    // enabled: !!episodeIdx
-    queryFn: fetchEpisode,
+    queryFn: () => fetchEpisode(episodeIdx || ""),
+    // queryFn: fetchEpisode,
   });
+  // enabled: !!episodeIdx
 
   const {
-    data: episodeData,
+    data: episodeDetail,
     isLoading: isEpisodeLoading,
     isError: isEpisodeError,
   } = episodeQueryResult;
-  const episodeDetail = episodeData;
 
   const charactersQueryResult = useQueries({
     queries: episodeDetail?.characters
@@ -74,11 +73,10 @@ export const EpisodeDetail = () => {
   });
 
   const {
-    data: charactersData,
+    data: episodeCharacters,
     loading: isCharactersLoading,
     error: isCharactersError,
   } = charactersQueryResult;
-  const episodeCharacters = charactersData;
 
   return (
     <>

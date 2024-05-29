@@ -27,7 +27,6 @@ export const CharacterList = () => {
     queryKey: ["characters"],
     queryFn: ({ pageParam }) => fetchCharacters(pageParam),
     initialPageParam: "https://swapi.dev/api/people/?page=1",
-    staleTime: 24 * 60 * 60 * 1000, // one day - stablish per default
     getNextPageParam: (lastPage) => lastPage.next,
   });
 
