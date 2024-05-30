@@ -8,9 +8,15 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const router = createBrowserRouter(appRoutes);
 
-const queryClient = new QueryClient();
 // aquí podemos pasar opciones por defecto para decirle cómo queremos que se
 // comporte nuestra aplicación
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 60 * 1000,
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
